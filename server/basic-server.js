@@ -2,7 +2,7 @@
 var http = require('http');
 
 // import the handle
-var handleRequest = require('./request-handler.js');
+var handleRequest = require('./request-handler').handleRequest;
 
 
 // Every server needs to listen on a port with a unique number. The
