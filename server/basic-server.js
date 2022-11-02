@@ -2,7 +2,8 @@
 var http = require('http');
 
 // import the handle
-var handleRequest = require('./request-handler').handleRequest;
+var handleRequest = require('./request-handler').requestHandler;
+var defaultCorsHeaders = require('./request-handler').defaultCorsHeaders;
 
 
 // Every server needs to listen on a port with a unique number. The
@@ -43,3 +44,7 @@ server.listen(port, ip);
 // server.listen() will continue running as long as there is the
 // possibility of serving more requests. To stop your server, hit
 // Ctrl-C on the command line.
+
+// use "scripts": {
+// "start:server": "nodemon server/basic-server.js",
+// to run nodeman

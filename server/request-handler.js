@@ -12,6 +12,15 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+// These headers will allow Cross-Origin Resource Sharing (CORS).
+// This code allows this server to talk to websites that
+// are on different domains, for instance, your chat client.
+//
+// Your chat client is running from a url like file://your/chat/client/index.html,
+// which is considered a different domain.
+//
+// Another way to get around this restriction is to serve you chat
+// client from this domain by setting up static file serving.
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -19,7 +28,11 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var requestHandler = function(request, response) {
+// the data need to be outside the rrequestHandler
+let data = [];
+let messageId = 1;
+
+var requestHandler = function (request, response) {
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -46,11 +59,11 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  // headers['Content-Type'] = 'text/plain';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -59,19 +72,55 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  // response.end('Hello, World!');
+
+
+  if (request.url === '/classes/messages') {
+    switch (request.method) {
+    case 'OPTIONS':
+      // 'what options are allowed to me for this resource?'
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+      response.end(defaultCorsHeaders['access-control-allow-methods']);
+      break;
+
+    case 'GET':
+      // headers contentType needs to be constant wit hwhat in the Client Parse
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+      response.end(JSON.stringify(data));
+      break;
+
+    case 'POST':
+      headers['Content-Type'] = 'application/json';
+      statusCode = 201;
+      response.writeHead(statusCode, headers);
+      let messaege = '';
+      // The `data` event, which is emitted whenever the stream passes a chunk of data to the consumer
+      request.on('data', chunk => {
+        messaege += chunk;
+      });
+      request.on('end', () => {
+        var messageParsed = JSON.parse(messaege);
+        messageParsed.messageId = messageId;
+        messageId++;
+        data.push(messageParsed);
+        // need to response end
+        response.end(JSON.stringify(data));
+      });
+    }
+  } else {
+    // for nonexistent endpoint
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+    response.end();
+  }
+
 };
 
-// These headers will allow Cross-Origin Resource Sharing (CORS).
-// This code allows this server to talk to websites that
-// are on different domains, for instance, your chat client.
-//
-// Your chat client is running from a url like file://your/chat/client/index.html,
-// which is considered a different domain.
-//
-// Another way to get around this restriction is to serve you chat
-// client from this domain by setting up static file serving.
 
 
-module.exports.handleRequest = requestHandler;
+
+
+module.exports.requestHandler = requestHandler;
 module.exports.defaultCorsHeaders = defaultCorsHeaders;
