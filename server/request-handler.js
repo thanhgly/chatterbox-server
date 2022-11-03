@@ -108,7 +108,14 @@ var requestHandler = function (request, response) {
         // need to response end
         response.end(JSON.stringify(data));
       });
+      break;
+
+    default:
+      statusCode = 404;
+      response.writeHead(statusCode, headers);
+      response.end();
     }
+
   } else {
     // for nonexistent endpoint
     statusCode = 404;
@@ -117,9 +124,6 @@ var requestHandler = function (request, response) {
   }
 
 };
-
-
-
 
 
 module.exports.requestHandler = requestHandler;

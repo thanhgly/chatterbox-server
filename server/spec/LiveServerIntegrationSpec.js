@@ -1,6 +1,9 @@
 var request = require('request');
 var expect = require('chai').expect;
 
+// only testes runing in this file will show on the spec runner server
+// http://127.0.0.1:3000/classes/messages
+// [{"username":"Jono","text":"Do my bidding!","messageId":1},{"username":"Jono","text":"Do my bidding!","messageId":2}]
 describe('server', function() {
 
   it('should respond to GET requests for /classes/messages with a 200 status code', function(done) {

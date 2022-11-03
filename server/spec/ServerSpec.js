@@ -2,10 +2,12 @@ var handler = require('../request-handler');
 var expect = require('chai').expect;
 var stubs = require('./Stubs');
 
-describe('Node Server Request Listener Function', function() {
-  it('Should answer GET requests for /classes/messages with a 200 status code', function() {
+describe('Node Server Request Listener Function', function () {
+  it('Should answer GET requests for /classes/messages with a 200 status code', function () {
     // This is a fake server request. Normally, the server would provide this,
     // but we want to test our function's behavior totally independent of the server code
+
+    // it WON't change the server
     var req = new stubs.request('/classes/messages', 'GET');
     var res = new stubs.response();
 
@@ -15,7 +17,7 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
-  it('Should send back parsable stringified JSON', function() {
+  it('Should send back parsable stringified JSON', function () {
     var req = new stubs.request('/classes/messages', 'GET');
     var res = new stubs.response();
 
@@ -25,7 +27,7 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
-  it('Should send back an array', function() {
+  it('Should send back an array', function () {
     var req = new stubs.request('/classes/messages', 'GET');
     var res = new stubs.response();
 
@@ -36,7 +38,7 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
-  it('Should accept posts to /classes/messages', function() {
+  it('Should accept posts to /classes/messages', function () {
     var stubMsg = {
       username: 'Jono',
       text: 'Do my bidding!'
@@ -55,7 +57,7 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
-  it('Should respond with messages that were previously posted', function() {
+  it('Should respond with messages that were previously posted', function () {
     var stubMsg = {
       username: 'Jono',
       text: 'Do my bidding!'
@@ -81,7 +83,7 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
-  it('Should 404 when asked for a nonexistent file', function() {
+  it('Should 404 when asked for a nonexistent file', function () {
     var req = new stubs.request('/arglebargle', 'GET');
     var res = new stubs.response();
 
@@ -90,5 +92,67 @@ describe('Node Server Request Listener Function', function() {
     expect(res._responseCode).to.equal(404);
     expect(res._ended).to.equal(true);
   });
+
+  // ADD 3 NEW TESTS
+
+  it('Should return all allowed method when getting OPTIONS request', function () {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+    expect(res._responseCode).to.equal(200);
+    expect(res._data).to.equal('GET, POST, PUT, DELETE, OPTIONS');
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should accept multiple messages', function () {
+    var stubMsgOne = {
+      username: 'AAA',
+      text: 'aaa'
+    };
+    var reqOne = new stubs.request('/classes/messages', 'POST', stubMsgOne);
+    var resOne = new stubs.response();
+
+    handler.requestHandler(reqOne, resOne);
+    expect(resOne._responseCode).to.equal(201);
+
+    var stubMsgTwo = {
+      username: 'BBB',
+      text: 'bbb'
+    };
+    var reqTwo = new stubs.request('/classes/messages', 'POST', stubMsgTwo);
+    var resTwo = new stubs.response();
+
+    handler.requestHandler(reqTwo, resTwo);
+    expect(resTwo._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+    console.log(req);
+
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data);
+
+    expect(messages.length).to.be.above(0);
+    expect(messages[messages.length - 1].username).to.equal('BBB');
+    expect(messages[messages.length - 1].text).to.equal('bbb');
+  });
+
+  it('Should 404 when asked for a not allowed method', function () {
+    var req = new stubs.request('/classes/messages', 'TEST');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(404);
+    expect(res._ended).to.equal(true);
+  });
+
+
+
 
 });
