@@ -30,7 +30,7 @@ var defaultCorsHeaders = {
 
 // the data need to be outside the rrequestHandler
 let data = [];
-let messageId = 1;
+let message_id = 1;
 
 var requestHandler = function (request, response) {
   // Request and Response come from node's http module.
@@ -102,8 +102,8 @@ var requestHandler = function (request, response) {
       });
       request.on('end', () => {
         var messageParsed = JSON.parse(messaege);
-        messageParsed.messageId = messageId;
-        messageId++;
+        messageParsed.message_id = message_id;
+        message_id++;
         data.push(messageParsed);
         // need to response end
         response.end(JSON.stringify(data));
