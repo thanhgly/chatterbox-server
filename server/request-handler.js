@@ -111,7 +111,7 @@ var requestHandler = function (request, response) {
       break;
 
     default:
-      statusCode = 404;
+      statusCode = 400;
       response.writeHead(statusCode, headers);
       response.end();
     }

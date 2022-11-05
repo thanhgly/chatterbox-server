@@ -131,7 +131,6 @@ describe('Node Server Request Listener Function', function () {
     res = new stubs.response();
 
     handler.requestHandler(req, res);
-    console.log(req);
 
 
     expect(res._responseCode).to.equal(200);
@@ -148,9 +147,11 @@ describe('Node Server Request Listener Function', function () {
 
     handler.requestHandler(req, res);
 
-    expect(res._responseCode).to.equal(404);
+    expect(res._responseCode).to.equal(400);
     expect(res._ended).to.equal(true);
   });
 
 
 });
+
+
